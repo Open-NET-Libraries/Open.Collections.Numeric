@@ -2,6 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
+    <Description>Useful set of extensions for processing collections of numerical data.
+
+Part of the "Open" set of libraries.</Description>
+    <PackageLicenseUrl>https://github.com/electricessence/Open/blob/master/LICENSE</PackageLicenseUrl>
+    <Product />
+    <Company />
+    <Authors>electricessence</Authors>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
