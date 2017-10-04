@@ -4,22 +4,13 @@
  */
 
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Dynamic;
-using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 using Open.Threading;
-using Open.Text;
-
+using Open.Numeric.Precision;
 
 namespace Open.Collections.Numeric
 {
@@ -176,7 +167,7 @@ namespace Open.Collections.Numeric
             foreach (var kv in values.OrderBy(k => k.Key))
             {
                 current = current.SumAccurate(kv.Value);
-                yield return KeyValuePair.New(kv.Key, current);
+                yield return KeyValuePair.Create(kv.Key, current);
             }
 
         }
@@ -248,7 +239,7 @@ namespace Open.Collections.Numeric
             return values.Select(v =>
             {
                 var value = v.Value;
-                return KeyValuePair.New(v.Key, value.IsNearZero(tolerance) ? 0d : value);
+                return KeyValuePair.Create(v.Key, value.IsNearZero(tolerance) ? 0d : value);
             });
         }
 
@@ -263,7 +254,7 @@ namespace Open.Collections.Numeric
             return values.Select(v =>
             {
                 var value = v.Value;
-                return KeyValuePair.New(v.Key, value.IsNearZero(tolerance) ? 0d : value);
+                return KeyValuePair.Create(v.Key, value.IsNearZero(tolerance) ? 0d : value);
             });
         }
 
