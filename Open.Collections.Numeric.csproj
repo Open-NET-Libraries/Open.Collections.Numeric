@@ -15,6 +15,7 @@ Part of the "Open" set of libraries.</Description>
     <RepositoryUrl>https://github.com/electricessence/Open.Collections.Numeric/</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>dotnet, dotnet-core, dotnetcore, cs, collections, numeric, double, extensions, threadsafe, thread-safe</PackageTags>
+    <Version>1.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
