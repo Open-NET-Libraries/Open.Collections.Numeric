@@ -22,7 +22,7 @@ Part of the "Open" set of libraries.</Description>
     <PackageReference Include="Open.Collections" Version="1.2.0" />
     <PackageReference Include="Open.Numeric" Version="1.0.1" />
     <PackageReference Include="Open.Text" Version="1.0.0" />
-    <PackageReference Include="Open.Threading" Version="1.1.4" />
+    <PackageReference Include="Open.Threading" Version="1.1.5" />
   </ItemGroup>
 
 </Project>
