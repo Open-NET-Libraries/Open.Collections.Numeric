@@ -19,6 +19,13 @@ Part of the "Open" set of libraries.</Description>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove=".git" />
+    <None Remove=".gitignore" />
+    <None Remove="LISCENSE.md" />
+    <None Remove="README.md" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Open.Collections" Version="1.2.0" />
     <PackageReference Include="Open.Numeric" Version="1.0.1" />
     <PackageReference Include="Open.Text" Version="1.0.0" />

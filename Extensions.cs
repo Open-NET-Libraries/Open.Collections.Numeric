@@ -16,9 +16,6 @@ namespace Open.Collections.Numeric
 {
     public static class Extensions
     {
-
-        
-
         /// <summary>
         /// Debug utility for asserting if a collection is equal.
         /// </summary>
@@ -285,23 +282,17 @@ namespace Open.Collections.Numeric
         }
 
 
-        /// <summary>
-        /// Thread safe paralleled method which divides all existing values the given denominator.
-        /// </summary>
         public static void DivideAll<TKey>(this IDictionary<TKey, double> target, double denominator)
         {
             if (target == null) throw new NullReferenceException();
 
             target.Keys.ToArray().ForEach(
-                //Parallel.ForEach(,
                 key => // In this case we get a copy of the keys in order to avoid unsafe enumeration problems.
                     Divide(target, key, denominator)
                 );
         }
 
-        /// <summary>
-        /// Thread safe paralleled method which divides all existing values the given denominator.
-        /// </summary>
+
         public static void DivideAll(this IDictionary<TimeSpan, double> target, double denominator)
         {
             if (target == null) throw new NullReferenceException();
@@ -309,9 +300,6 @@ namespace Open.Collections.Numeric
             DivideAll<TimeSpan>(target, denominator);
         }
 
-        /// <summary>
-        /// Thread safe paralleled method which divides all existing values the given denominator.
-        /// </summary>
         public static void DivideAll(this IDictionary<DateTime, double> target, double denominator)
         {
             if (target == null) throw new NullReferenceException();
