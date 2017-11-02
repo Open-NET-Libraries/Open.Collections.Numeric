@@ -15,7 +15,7 @@ Part of the "Open" set of libraries.</Description>
     <RepositoryUrl>https://github.com/electricessence/Open.Collections.Numeric/</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>dotnet, dotnet-core, dotnetcore, cs, collections, numeric, double, extensions, threadsafe, thread-safe</PackageTags>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,8 +26,8 @@ Part of the "Open" set of libraries.</Description>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Open.Collections" Version="2.0.1" />
-    <PackageReference Include="Open.Numeric" Version="1.0.1" />
+    <PackageReference Include="Open.Collections" Version="2.1.2" />
+    <PackageReference Include="Open.Numeric" Version="1.0.5" />
     <PackageReference Include="Open.Text" Version="1.0.0" />
     <PackageReference Include="Open.Threading" Version="1.2.1" />
   </ItemGroup>
