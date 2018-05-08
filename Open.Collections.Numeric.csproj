@@ -25,6 +25,10 @@ Part of the "Open" set of libraries.</Description>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove=".git" />
     <None Remove=".gitignore" />
