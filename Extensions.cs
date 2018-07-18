@@ -3,15 +3,15 @@
  * Licensing: MIT https://github.com/electricessence/Open/blob/dotnet-core/LICENSE.md
  */
 
+using Open.Numeric.Precision;
+using Open.Threading;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading.Tasks;
-using Open.Threading;
-using Open.Numeric.Precision;
-using System.Diagnostics.Contracts;
 
 namespace Open.Collections.Numeric
 {
@@ -49,7 +49,7 @@ namespace Open.Collections.Numeric
 				Debug.Fail("Copy has key that target doesn't.");
 				return;
 			}
-			foreach (TKey key in target.Keys)
+			foreach (var key in target.Keys)
 			{
 				if (!copy.ContainsKey(key))
 				{
@@ -59,8 +59,8 @@ namespace Open.Collections.Numeric
 				}
 				else
 				{
-					TValue a = target[key];
-					TValue b = copy[key];
+					var a = target[key];
+					var b = copy[key];
 					if (!a.IsNearEqual(b, 0.001))
 					{
 						Debugger.Break();
