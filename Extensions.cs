@@ -9,6 +9,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,6 +21,7 @@ namespace Open.Collections.Numeric
 		/// <summary>
 		/// Debug utility for asserting if a collection is equal.
 		/// </summary>
+		[SuppressMessage("ReSharper", "HeuristicUnreachableCode")]
 		public static void AssertEquality<TKey, TValue>(this IDictionary<TKey, TValue> target, IDictionary<TKey, TValue> copy)
 			where TValue : IComparable
 		{
@@ -61,12 +63,10 @@ namespace Open.Collections.Numeric
 				{
 					var a = target[key];
 					var b = copy[key];
-					if (!a.IsNearEqual(b, 0.001))
-					{
-						Debugger.Break();
-						Debug.Fail("Copied value is not equal!");
-						return;
-					}
+					if (a.IsNearEqual(b, 0.001)) continue;
+					Debugger.Break();
+					Debug.Fail("Copied value is not equal!");
+					return;
 				}
 			}
 		}
@@ -75,7 +75,8 @@ namespace Open.Collections.Numeric
 		/// <summary>
 		/// Creates a single dictionary containing the sum of the values grouped by cacheKey.
 		/// </summary>
-		/// <param name="autoPrecision">True is keepgoing accurate but less performant.  False uses default double precision math.</param>
+		/// <param name="values">The source enumerable.</param>
+		/// <param name="autoPrecision">True is more accurate but less performant.  False uses default double precision math.</param>
 		public static IDictionary<TKey, double> SumValues<TKey>(this IEnumerable<IDictionary<TKey, double>> values, bool autoPrecision = true)
 			where TKey : IComparable
 		{
@@ -96,7 +97,9 @@ namespace Open.Collections.Numeric
 		/// <summary>
 		/// Creates a single sorted dictionary containing the sum of the values grouped by cacheKey.
 		/// </summary>
-		/// <param name="autoPrecision">True is keepgoing accurate but less performant.  False uses default double precision math.</param>
+		/// <param name="values">The source values.</param>
+		/// <param name="autoPrecision">True is more accurate but less performant.  False uses default double precision math.</param>
+		/// <param name="allowParallel">Enables parallel processing of source enumerable.</param>
 		public static SortedDictionary<TKey, double> SumValuesOrdered<TKey>(this IEnumerable<IDictionary<TKey, double>> values, bool autoPrecision = true, bool allowParallel = false)
 			where TKey : IComparable
 		{
@@ -118,7 +121,8 @@ namespace Open.Collections.Numeric
 		/// <summary>
 		/// Creates a single sorted dictionary containing the sum of the values grouped by cacheKey.
 		/// </summary>
-		/// <param name="autoPrecision">True is keepgoing accurate but less performant.  False uses default double precision math.</param>
+		/// <param name="values">The source enumerable</param>
+		/// <param name="autoPrecision">True is more accurate but less performant.  False uses default double precision math.</param>
 		public static SortedDictionary<TKey, double> SumValuesOrdered<TKey>(this ParallelQuery<IDictionary<TKey, double>> values, bool autoPrecision = true)
 			where TKey : IComparable
 		{
@@ -140,6 +144,7 @@ namespace Open.Collections.Numeric
 		/// <summary>
 		/// Returns how the set of values has changed.
 		/// </summary>
+		/// <param name="values">The source enumerable</param>
 		public static IDictionary<TKey, double> Deltas<TKey>(this IEnumerable<KeyValuePair<TKey, double>> values)
 		{
 			if (values == null) throw new NullReferenceException();
@@ -161,6 +166,7 @@ namespace Open.Collections.Numeric
 		/// <summary>
 		/// Is the effective inverse of Deltas.  Renders the values as they are based on their changes.
 		/// </summary>
+		/// <param name="values">The source enumerable</param>
 		public static IEnumerable<KeyValuePair<TKey, double>> DeltaCurve<TKey>(this IEnumerable<KeyValuePair<TKey, double>> values)
 		{
 			if (values == null) throw new NullReferenceException();
@@ -178,6 +184,7 @@ namespace Open.Collections.Numeric
 		/// <summary>
 		/// Returns how the set of values has changed.
 		/// </summary>
+		/// <param name="values">The source enumerable</param>
 		public static IEnumerable<IDictionary<TKey, double>> Deltas<TKey>(this IEnumerable<IEnumerable<KeyValuePair<TKey, double>>> values)
 		{
 			if (values == null) throw new NullReferenceException();
@@ -189,6 +196,7 @@ namespace Open.Collections.Numeric
 		/// <summary>
 		/// Returns how the set of values has changed.
 		/// </summary>
+		/// <param name="values">The source enumerable</param>
 		public static ParallelQuery<IDictionary<TKey, double>> Deltas<TKey>(this ParallelQuery<IDictionary<TKey, double>> values)
 		{
 			if (values == null) throw new NullReferenceException();
@@ -200,21 +208,28 @@ namespace Open.Collections.Numeric
 		/// <summary>
 		/// Accurately adds the values from a set of curves and returns one curve.
 		/// </summary>
-		public static IEnumerable<KeyValuePair<TKey, double>> SumCurves<TKey>(this IEnumerable<IDictionary<TKey, double>> values, bool autoPrecision = false)
+		/// <param name="values">The source enumerable</param>
+		public static IEnumerable<KeyValuePair<TKey, double>> SumCurves<TKey>(this IEnumerable<IDictionary<TKey, double>> values)
 			where TKey : IComparable
 		{
 			if (values == null) throw new NullReferenceException();
 			Contract.EndContractBlock();
 
 			// Optimize to avoiding unnecessary processing...
-			var one = values.Take(2).ToArray();
+			var v = values.Memoize();
+			var one = v.Take(2).ToArray();
 
-			if (one.Length == 0)
-				return new SortedDictionary<TKey, double>();
-			if (one.Length == 1)
-				return new SortedDictionary<TKey, double>(one.Single());
+			switch (one.Length)
+			{
+				case 0:
+					v.Dispose();
+					return new SortedDictionary<TKey, double>();
+				case 1:
+					v.Dispose();
+					return new SortedDictionary<TKey, double>(one.Single());
+			}
 
-			return values
+			return v
 				.Deltas()
 				.SumValuesOrdered()
 				.DeltaCurve();
@@ -223,6 +238,7 @@ namespace Open.Collections.Numeric
 		/// <summary>
 		/// Accurately adds the values from a set of curves and returns one curve.
 		/// </summary>
+		// ReSharper disable once UnusedParameter.Global
 		public static IEnumerable<KeyValuePair<TKey, double>> SumCurves<TKey>(this ParallelQuery<IDictionary<TKey, double>> values, bool autoPrecision = false)
 			where TKey : IComparable
 		{
@@ -340,7 +356,7 @@ namespace Open.Collections.Numeric
 
 		/// <summary>
 		/// Adds a value to the colleciton or replaces the existing value with the sum of the two.
-		/// Uses a keepgoing accurate and less performant method instead of double precision math.
+		/// Uses a more accurate and less performant method instead of double precision math.
 		/// </summary>
 		public static void AddValueAccurate<TKey>(this ConcurrentDictionary<TKey, double> target, TKey key, double value)
 		{
@@ -457,7 +473,7 @@ namespace Open.Collections.Numeric
 
 		/// <summary>
 		/// Adds values to the colleciton or replaces the existing values with the sum of the two.
-		/// Uses a keepgoing accurate and less performant method instead of double precision math.
+		/// Uses a more accurate and less performant method instead of double precision math.
 		/// </summary>
 		public static void AddValuesAccurateSelective<TKey>(this ConcurrentDictionary<TKey, double> target, IDictionary<TKey, double> add, bool allowParallel = false)
 		{
@@ -472,7 +488,7 @@ namespace Open.Collections.Numeric
 
 		/// <summary>
 		/// Adds values to the colleciton or replaces the existing values with the sum of the two.
-		/// Uses a keepgoing accurate and less performant method instead of double precision math.
+		/// Uses a more accurate and less performant method instead of double precision math.
 		/// </summary>
 		public static void AddValuesAccurate<TKey>(this ConcurrentDictionary<TKey, double> target, IDictionary<TKey, double> add)
 		{
@@ -482,7 +498,7 @@ namespace Open.Collections.Numeric
 				throw new ArgumentNullException(nameof(add));
 			Contract.EndContractBlock();
 
-			AddValuesAccurateSelective(target, add, false);
+			AddValuesAccurateSelective(target, add);
 		}
 
 		#endregion
@@ -543,7 +559,7 @@ namespace Open.Collections.Numeric
 
 		/// <summary>
 		/// Adds a value to the colleciton or replaces the existing value with the sum of the two.
-		/// Uses a keepgoing accurate and less performant method instead of double precision math.
+		/// Uses a more accurate and less performant method instead of double precision math.
 		/// </summary>
 		public static void AddValueAccurateSynchronized<TKey>(this IDictionary<TKey, double> target, TKey key, double value)
 		{
@@ -638,7 +654,7 @@ namespace Open.Collections.Numeric
 
 		/// <summary>
 		/// Adds values to the colleciton or replaces the existing values with the sum of the two.
-		/// Uses a keepgoing accurate and less performant method instead of double precision math.
+		/// Uses a more accurate and less performant method instead of double precision math.
 		/// </summary>
 		public static void AddValueAccurateSynchronized<TKey>(this IDictionary<TKey, double> target, IDictionary<TKey, double> add)
 		{
