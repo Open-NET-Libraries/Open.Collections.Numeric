@@ -239,7 +239,7 @@ namespace Open.Collections.Numeric
 		/// Accurately adds the values from a set of curves and returns one curve.
 		/// </summary>
 		// ReSharper disable once UnusedParameter.Global
-		public static IEnumerable<KeyValuePair<TKey, double>> SumCurves<TKey>(this ParallelQuery<IDictionary<TKey, double>> values, bool autoPrecision = false)
+		public static IEnumerable<KeyValuePair<TKey, double>> SumCurves<TKey>(this ParallelQuery<IDictionary<TKey, double>> values)
 			where TKey : IComparable
 		{
 			if (values == null) throw new NullReferenceException();
