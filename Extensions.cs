@@ -1,9 +1,4 @@
-﻿/*!
- * @author electricessence / https://github.com/electricessence/
- * Licensing: MIT https://github.com/electricessence/Open/blob/dotnet-core/LICENSE.md
- */
-
-using Open.Numeric.Precision;
+﻿using Open.Numeric.Precision;
 using Open.Threading;
 using System;
 using System.Collections.Concurrent;
@@ -25,15 +20,15 @@ namespace Open.Collections.Numeric
 		public static void AssertEquality<TKey, TValue>(this IDictionary<TKey, TValue> target, IDictionary<TKey, TValue> copy)
 			where TValue : IComparable
 		{
-			if (copy == null && target == null) return;
+			if (copy is null && target is null) return;
 
-			if (target == null)
+			if (target is null)
 			{
 				Debugger.Break();
 				Debug.Fail("Target is null.");
 				return;
 			}
-			if (copy == null)
+			if (copy is null)
 			{
 				Debugger.Break();
 				Debug.Fail("Copy is null.");
@@ -80,7 +75,7 @@ namespace Open.Collections.Numeric
 		public static IDictionary<TKey, double> SumValues<TKey>(this IEnumerable<IDictionary<TKey, double>> values, bool autoPrecision = true)
 			where TKey : IComparable
 		{
-			if (values == null) throw new NullReferenceException();
+			if (values is null) throw new NullReferenceException();
 			Contract.EndContractBlock();
 
 			var result = new ConcurrentDictionary<TKey, double>();
@@ -103,7 +98,7 @@ namespace Open.Collections.Numeric
 		public static SortedDictionary<TKey, double> SumValuesOrdered<TKey>(this IEnumerable<IDictionary<TKey, double>> values, bool autoPrecision = true, bool allowParallel = false)
 			where TKey : IComparable
 		{
-			if (values == null) throw new NullReferenceException();
+			if (values is null) throw new NullReferenceException();
 			Contract.EndContractBlock();
 
 			var result = new ConcurrentDictionary<TKey, double>();
@@ -126,7 +121,7 @@ namespace Open.Collections.Numeric
 		public static SortedDictionary<TKey, double> SumValuesOrdered<TKey>(this ParallelQuery<IDictionary<TKey, double>> values, bool autoPrecision = true)
 			where TKey : IComparable
 		{
-			if (values == null) throw new NullReferenceException();
+			if (values is null) throw new NullReferenceException();
 			Contract.EndContractBlock();
 
 			var result = new ConcurrentDictionary<TKey, double>();
@@ -147,7 +142,7 @@ namespace Open.Collections.Numeric
 		/// <param name="values">The source enumerable</param>
 		public static IDictionary<TKey, double> Deltas<TKey>(this IEnumerable<KeyValuePair<TKey, double>> values)
 		{
-			if (values == null) throw new NullReferenceException();
+			if (values is null) throw new NullReferenceException();
 			Contract.EndContractBlock();
 
 			var result = new SortedDictionary<TKey, double>();
@@ -169,7 +164,7 @@ namespace Open.Collections.Numeric
 		/// <param name="values">The source enumerable</param>
 		public static IEnumerable<KeyValuePair<TKey, double>> DeltaCurve<TKey>(this IEnumerable<KeyValuePair<TKey, double>> values)
 		{
-			if (values == null) throw new NullReferenceException();
+			if (values is null) throw new NullReferenceException();
 			Contract.EndContractBlock();
 
 			double current = 0; // Must be done in order...
@@ -187,7 +182,7 @@ namespace Open.Collections.Numeric
 		/// <param name="values">The source enumerable</param>
 		public static IEnumerable<IDictionary<TKey, double>> Deltas<TKey>(this IEnumerable<IEnumerable<KeyValuePair<TKey, double>>> values)
 		{
-			if (values == null) throw new NullReferenceException();
+			if (values is null) throw new NullReferenceException();
 			Contract.EndContractBlock();
 
 			return values.Select(v => v.Deltas());
@@ -199,7 +194,7 @@ namespace Open.Collections.Numeric
 		/// <param name="values">The source enumerable</param>
 		public static ParallelQuery<IDictionary<TKey, double>> Deltas<TKey>(this ParallelQuery<IDictionary<TKey, double>> values)
 		{
-			if (values == null) throw new NullReferenceException();
+			if (values is null) throw new NullReferenceException();
 			Contract.EndContractBlock();
 
 			return values.Select(v => v.Deltas());
@@ -212,7 +207,7 @@ namespace Open.Collections.Numeric
 		public static IEnumerable<KeyValuePair<TKey, double>> SumCurves<TKey>(this IEnumerable<IDictionary<TKey, double>> values)
 			where TKey : IComparable
 		{
-			if (values == null) throw new NullReferenceException();
+			if (values is null) throw new NullReferenceException();
 			Contract.EndContractBlock();
 
 			// Optimize to avoiding unnecessary processing...
@@ -242,7 +237,7 @@ namespace Open.Collections.Numeric
 		public static IEnumerable<KeyValuePair<TKey, double>> SumCurves<TKey>(this ParallelQuery<IDictionary<TKey, double>> values)
 			where TKey : IComparable
 		{
-			if (values == null) throw new NullReferenceException();
+			if (values is null) throw new NullReferenceException();
 			Contract.EndContractBlock();
 
 			return values
@@ -257,7 +252,7 @@ namespace Open.Collections.Numeric
 		public static IEnumerable<KeyValuePair<TKey, double>> ResetZeros<TKey>(this IEnumerable<KeyValuePair<TKey, double>> values, double tolerance = double.Epsilon)
 			where TKey : IComparable
 		{
-			if (values == null) throw new NullReferenceException();
+			if (values is null) throw new NullReferenceException();
 			Contract.EndContractBlock();
 
 			return values.Select(v =>
@@ -273,7 +268,7 @@ namespace Open.Collections.Numeric
 		public static ParallelQuery<KeyValuePair<TKey, double>> ResetZeros<TKey>(this ParallelQuery<KeyValuePair<TKey, double>> values, double tolerance = double.Epsilon)
 			where TKey : IComparable
 		{
-			if (values == null) throw new NullReferenceException();
+			if (values is null) throw new NullReferenceException();
 			Contract.EndContractBlock();
 
 			return values.Select(v =>
@@ -290,8 +285,8 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void Divide<TKey>(this IDictionary<TKey, double> target, TKey key, double denominator)
 		{
-			if (target == null) throw new NullReferenceException();
-			if (key == null) throw new ArgumentNullException(nameof(key));
+			if (target is null) throw new NullReferenceException();
+			if (key is null) throw new ArgumentNullException(nameof(key));
 			Contract.EndContractBlock();
 
 			/*var c = target as ConcurrentDictionary<TKey, double>;
@@ -313,7 +308,7 @@ namespace Open.Collections.Numeric
 
 		public static void DivideAll<TKey>(this IDictionary<TKey, double> target, double denominator)
 		{
-			if (target == null) throw new NullReferenceException();
+			if (target is null) throw new NullReferenceException();
 			Contract.EndContractBlock();
 
 			target.Keys.ToArray().ForEach(
@@ -325,7 +320,7 @@ namespace Open.Collections.Numeric
 
 		public static void DivideAll(this IDictionary<TimeSpan, double> target, double denominator)
 		{
-			if (target == null) throw new NullReferenceException();
+			if (target is null) throw new NullReferenceException();
 			Contract.EndContractBlock();
 
 			DivideAll<TimeSpan>(target, denominator);
@@ -333,7 +328,7 @@ namespace Open.Collections.Numeric
 
 		public static void DivideAll(this IDictionary<DateTime, double> target, double denominator)
 		{
-			if (target == null) throw new NullReferenceException();
+			if (target is null) throw new NullReferenceException();
 			Contract.EndContractBlock();
 
 			DivideAll<DateTime>(target, denominator);
@@ -347,7 +342,7 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValue<TKey>(this ConcurrentDictionary<TKey, double> target, TKey key, double value)
 		{
-			if (target == null)
+			if (target is null)
 				throw new NullReferenceException();
 			Contract.EndContractBlock();
 
@@ -360,7 +355,7 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValueAccurate<TKey>(this ConcurrentDictionary<TKey, double> target, TKey key, double value)
 		{
-			if (target == null)
+			if (target is null)
 				throw new NullReferenceException();
 			Contract.EndContractBlock();
 
@@ -372,7 +367,7 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValue<TKey>(this ConcurrentDictionary<TKey, int> target, TKey key, int value)
 		{
-			if (target == null)
+			if (target is null)
 				throw new NullReferenceException();
 			Contract.EndContractBlock();
 
@@ -384,7 +379,7 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValue<TKey>(this ConcurrentDictionary<TKey, uint> target, TKey key, uint value)
 		{
-			if (target == null)
+			if (target is null)
 				throw new NullReferenceException();
 			Contract.EndContractBlock();
 
@@ -396,7 +391,7 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void IncrementValue<TKey>(this ConcurrentDictionary<TKey, uint> target, TKey key)
 		{
-			if (target == null)
+			if (target is null)
 				throw new NullReferenceException();
 			Contract.EndContractBlock();
 
@@ -408,7 +403,7 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValue(this ConcurrentDictionary<TimeSpan, double> target, TimeSpan time, double value)
 		{
-			if (target == null)
+			if (target is null)
 				throw new NullReferenceException();
 			Contract.EndContractBlock();
 
@@ -420,7 +415,7 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValue(this ConcurrentDictionary<TimeSpan, double> target, DateTime datetime, double value)
 		{
-			if (target == null)
+			if (target is null)
 				throw new NullReferenceException();
 			Contract.EndContractBlock();
 
@@ -432,7 +427,7 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValue(this ConcurrentDictionary<DateTime, double> target, TimeSpan time, double v)
 		{
-			if (target == null)
+			if (target is null)
 				throw new NullReferenceException();
 
 			AddValue(target, DateTime.MinValue.Add(time), v);
@@ -444,9 +439,9 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValues<TKey>(this ConcurrentDictionary<TKey, double> target, IDictionary<TKey, double> add, bool allowParallel = false)
 		{
-			if (target == null)
+			if (target is null)
 				throw new NullReferenceException();
-			if (add == null)
+			if (add is null)
 				throw new ArgumentNullException(nameof(add));
 			Contract.EndContractBlock();
 
@@ -458,9 +453,9 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValues<TKey>(this IDictionary<TKey, double> target, IDictionary<TKey, double> add)
 		{
-			if (target == null)
+			if (target is null)
 				throw new NullReferenceException();
-			if (add == null)
+			if (add is null)
 				throw new ArgumentNullException(nameof(add));
 			Contract.EndContractBlock();
 
@@ -477,9 +472,9 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValuesAccurateSelective<TKey>(this ConcurrentDictionary<TKey, double> target, IDictionary<TKey, double> add, bool allowParallel = false)
 		{
-			if (target == null)
+			if (target is null)
 				throw new NullReferenceException();
-			if (add == null)
+			if (add is null)
 				throw new ArgumentNullException(nameof(add));
 			Contract.EndContractBlock();
 
@@ -492,9 +487,9 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValuesAccurate<TKey>(this ConcurrentDictionary<TKey, double> target, IDictionary<TKey, double> add)
 		{
-			if (target == null)
+			if (target is null)
 				throw new NullReferenceException();
-			if (add == null)
+			if (add is null)
 				throw new ArgumentNullException(nameof(add));
 			Contract.EndContractBlock();
 
@@ -510,8 +505,8 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValueAccurate<TKey>(this IDictionary<TKey, double> target, TKey key, double value)
 		{
-			if (target == null) throw new NullReferenceException();
-			if (key == null) throw new ArgumentNullException(nameof(key));
+			if (target is null) throw new NullReferenceException();
+			if (key is null) throw new ArgumentNullException(nameof(key));
 			Contract.EndContractBlock();
 
 			target.AddOrUpdate(key, value, (k, old) => old.SumAccurate(value));
@@ -523,8 +518,8 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValue<TKey>(this IDictionary<TKey, double> target, TKey key, double value)
 		{
-			if (target == null) throw new NullReferenceException();
-			if (key == null) throw new ArgumentNullException(nameof(key));
+			if (target is null) throw new NullReferenceException();
+			if (key is null) throw new ArgumentNullException(nameof(key));
 			Contract.EndContractBlock();
 
 			target.AddOrUpdate(key, value, (k, old) => old + value);
@@ -536,8 +531,8 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValue<TKey>(this IDictionary<TKey, int> target, TKey key, int value)
 		{
-			if (target == null) throw new NullReferenceException();
-			if (key == null) throw new ArgumentNullException(nameof(key));
+			if (target is null) throw new NullReferenceException();
+			if (key is null) throw new ArgumentNullException(nameof(key));
 			Contract.EndContractBlock();
 
 			target.AddOrUpdate(key, value, (k, old) => old + value);
@@ -549,8 +544,8 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValue<TKey>(this IDictionary<TKey, uint> target, TKey key, uint value)
 		{
-			if (target == null) throw new NullReferenceException();
-			if (key == null) throw new ArgumentNullException(nameof(key));
+			if (target is null) throw new NullReferenceException();
+			if (key is null) throw new ArgumentNullException(nameof(key));
 			Contract.EndContractBlock();
 
 			target.AddOrUpdate(key, value, (k, old) => old + value);
@@ -563,8 +558,8 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValueAccurateSynchronized<TKey>(this IDictionary<TKey, double> target, TKey key, double value)
 		{
-			if (target == null) throw new NullReferenceException();
-			if (key == null) throw new ArgumentNullException(nameof(key));
+			if (target is null) throw new NullReferenceException();
+			if (key is null) throw new ArgumentNullException(nameof(key));
 			Contract.EndContractBlock();
 
 			ThreadSafety.SynchronizeWrite(target, () => target.AddValueAccurate(key, value));
@@ -575,8 +570,8 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValueSynchronized<TKey>(this IDictionary<TKey, double> target, TKey key, double value)
 		{
-			if (target == null) throw new NullReferenceException();
-			if (key == null) throw new ArgumentNullException(nameof(key));
+			if (target is null) throw new NullReferenceException();
+			if (key is null) throw new ArgumentNullException(nameof(key));
 			Contract.EndContractBlock();
 
 			ThreadSafety.SynchronizeWrite(target, () => target.AddValue(key, value));
@@ -587,8 +582,8 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValueSynchronized<TKey>(this IDictionary<TKey, int> target, TKey key, int value)
 		{
-			if (target == null) throw new NullReferenceException();
-			if (key == null) throw new ArgumentNullException(nameof(key));
+			if (target is null) throw new NullReferenceException();
+			if (key is null) throw new ArgumentNullException(nameof(key));
 			Contract.EndContractBlock();
 
 			ThreadSafety.SynchronizeWrite(target, () => target.AddValue(key, value));
@@ -599,8 +594,8 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValueSynchronized<TKey>(this IDictionary<TKey, uint> target, TKey key, uint value)
 		{
-			if (target == null) throw new NullReferenceException();
-			if (key == null) throw new ArgumentNullException(nameof(key));
+			if (target is null) throw new NullReferenceException();
+			if (key is null) throw new ArgumentNullException(nameof(key));
 			Contract.EndContractBlock();
 
 			ThreadSafety.SynchronizeWrite(target, () => target.AddValue(key, value));
@@ -611,8 +606,8 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void IncrementValueSynchronized<TKey>(this IDictionary<TKey, uint> target, TKey key)
 		{
-			if (target == null) throw new NullReferenceException();
-			if (key == null) throw new ArgumentNullException(nameof(key));
+			if (target is null) throw new NullReferenceException();
+			if (key is null) throw new ArgumentNullException(nameof(key));
 			Contract.EndContractBlock();
 
 			target.AddValueSynchronized(key, 1);
@@ -623,7 +618,7 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValueSynchronized(this IDictionary<TimeSpan, double> target, DateTime datetime, double value)
 		{
-			if (target == null) throw new NullReferenceException();
+			if (target is null) throw new NullReferenceException();
 			Contract.EndContractBlock();
 
 			target.AddValueSynchronized(datetime.TimeOfDay, value);
@@ -634,7 +629,7 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValueSynchronized(this IDictionary<DateTime, double> target, TimeSpan time, double value)
 		{
-			if (target == null) throw new NullReferenceException();
+			if (target is null) throw new NullReferenceException();
 			Contract.EndContractBlock();
 
 			target.AddValueSynchronized(DateTime.MinValue.Add(time), value);
@@ -645,7 +640,7 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValueSynchronized<TKey>(this IDictionary<TKey, double> target, IDictionary<TKey, double> add)
 		{
-			if (target == null) throw new NullReferenceException();
+			if (target is null) throw new NullReferenceException();
 			Contract.EndContractBlock();
 
 			// For abs peak performance only create locking for individual entries...
@@ -658,7 +653,7 @@ namespace Open.Collections.Numeric
 		/// </summary>
 		public static void AddValueAccurateSynchronized<TKey>(this IDictionary<TKey, double> target, IDictionary<TKey, double> add)
 		{
-			if (target == null) throw new NullReferenceException();
+			if (target is null) throw new NullReferenceException();
 			Contract.EndContractBlock();
 
 			// For abs peak performance only create locking for individual entries...
