@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Open.Disposable;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Open.Collections.Numeric
 {
-	public class PossibleAddends : IDisposable
+	public class PossibleAddends : DisposableBase
 	{
 		public PossibleAddends()
 		{
@@ -22,11 +23,11 @@ namespace Open.Collections.Numeric
 		{
 			if (count > int.MaxValue)
 				throw new ArgumentOutOfRangeException(nameof(count), count, "Cannot be greater than signed 32 bit integer maximum.");
-			if(count<2 || sum < 3)
+			if (count < 2 || sum < 3)
 				yield break;
 
 
-			if (count==2)
+			if (count == 2)
 			{
 				int i = 0;
 			loop2:
@@ -57,6 +58,6 @@ namespace Open.Collections.Numeric
 			}
 		}
 
-		public void Dispose() => Cache.Clear();
+		protected override void OnDispose() => Cache.Clear();
 	}
 }

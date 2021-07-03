@@ -4,7 +4,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,7 +15,6 @@ namespace Open.Collections.Numeric
 		/// <summary>
 		/// Debug utility for asserting if a collection is equal.
 		/// </summary>
-		[SuppressMessage("ReSharper", "HeuristicUnreachableCode")]
 		public static void AssertEquality<TKey, TValue>(this IDictionary<TKey, TValue> target, IDictionary<TKey, TValue> copy)
 			where TValue : IComparable
 		{
