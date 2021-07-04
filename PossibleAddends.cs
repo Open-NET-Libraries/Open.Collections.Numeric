@@ -15,9 +15,13 @@ namespace Open.Collections.Numeric
 		readonly ConcurrentDictionary<int, ConcurrentDictionary<int, IReadOnlyList<IReadOnlyList<int>>>> Cache = new();
 
 		public IReadOnlyList<IReadOnlyList<int>> UniqueAddendsFor(int sum, int count)
-			=> Cache
+		{
+			AssertIsAlive(true);
+
+			return Cache
 				.GetOrAdd(count, key => new ConcurrentDictionary<int, IReadOnlyList<IReadOnlyList<int>>>())
 				.GetOrAdd(sum, key => GetUniqueAddends(sum, count).Memoize());
+		}
 
 		public IEnumerable<IReadOnlyList<int>> GetUniqueAddends(int sum, int count)
 		{
@@ -58,6 +62,16 @@ namespace Open.Collections.Numeric
 			}
 		}
 
-		protected override void OnDispose() => Cache.Clear();
+		protected override void OnDispose()
+		{
+			foreach(var c in Cache.Values)
+			{
+				foreach (var s in c.Values)
+				{
+					if(s is IDisposable d) d.Dispose();
+				}
+			}
+			Cache.Clear();
+		}
 	}
 }
