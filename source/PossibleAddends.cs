@@ -68,11 +68,11 @@ namespace Open.Collections.Numeric
 
 		protected override void OnDispose()
 		{
-			foreach(var c in Cache.Values)
+			foreach (var c in Cache.Values)
 			{
 				foreach (var s in c.Values)
 				{
-					if(s is IDisposable d) d.Dispose();
+					if (s is IDisposable d) d.Dispose();
 				}
 			}
 			Cache.Clear();
