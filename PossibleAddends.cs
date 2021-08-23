@@ -68,11 +68,11 @@ namespace Open.Collections.Numeric
 
 		protected override void OnDispose()
 		{
-			foreach(var c in Cache.Values)
+			foreach (var c in Cache.Values)
 			{
 				foreach (var s in c.Values)
 				{
-					if(s is IDisposable d) d.Dispose();
+					if (s is IDisposable d) d.Dispose();
 				}
 			}
 			Cache.Clear();
@@ -86,8 +86,8 @@ namespace Open.Collections.Numeric
 			if (count < 2 || sum < 3)
 				yield break;
 
-			var pool = ArrayPool<int>.Shared;
-			var result = pool.Rent(count);
+			var pool = count > 128 ? ArrayPool<int>.Shared : null;
+			var result = pool?.Rent(count) ?? new int[count];
 
 			try
 			{
@@ -125,7 +125,7 @@ namespace Open.Collections.Numeric
 			}
 			finally
 			{
-				pool.Return(result);
+				pool?.Return(result);
 			}
 		}
 
