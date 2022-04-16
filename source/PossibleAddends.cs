@@ -6,33 +6,29 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Open.Collections.Numeric
+namespace Open.Collections.Numeric;
+
+public class PossibleAddends : DisposableBase
 {
-	public class PossibleAddends : DisposableBase
+	readonly ConcurrentDictionary<int, ConcurrentDictionary<int, IReadOnlyList<IReadOnlyList<int>>>> Cache = new();
+
+	public IReadOnlyList<IReadOnlyList<int>> UniqueAddendsFor(int sum, int count)
 	{
-		public PossibleAddends()
+		_ = AssertIsAlive(true);
+
+		return Cache
+			.GetOrAdd(count, _ => new ConcurrentDictionary<int, IReadOnlyList<IReadOnlyList<int>>>())
+			.GetOrAdd(sum, _ => GetUniqueAddends(sum, count).Memoize());
+	}
+
+	public IEnumerable<IReadOnlyList<int>> GetUniqueAddends(int sum, int count)
+	{
+		return count > int.MaxValue ? throw new ArgumentOutOfRangeException(nameof(count), count, "Cannot be greater than signed 32 bit integer maximum.")
+			: count < 2 || sum < 3 ? Enumerable.Empty<IReadOnlyList<int>>()
+			: GetUniqueAddendsCore(sum, count);
+
+		IEnumerable<IReadOnlyList<int>> GetUniqueAddendsCore(int sum, int count)
 		{
-		}
-
-		readonly ConcurrentDictionary<int, ConcurrentDictionary<int, IReadOnlyList<IReadOnlyList<int>>>> Cache = new();
-
-		public IReadOnlyList<IReadOnlyList<int>> UniqueAddendsFor(int sum, int count)
-		{
-			AssertIsAlive(true);
-
-			return Cache
-				.GetOrAdd(count, key => new ConcurrentDictionary<int, IReadOnlyList<IReadOnlyList<int>>>())
-				.GetOrAdd(sum, key => GetUniqueAddends(sum, count).Memoize());
-		}
-
-		public IEnumerable<IReadOnlyList<int>> GetUniqueAddends(int sum, int count)
-		{
-			if (count > int.MaxValue)
-				throw new ArgumentOutOfRangeException(nameof(count), count, "Cannot be greater than signed 32 bit integer maximum.");
-			if (count < 2 || sum < 3)
-				yield break;
-
-
 			if (count == 2)
 			{
 				int i = 0;
@@ -65,27 +61,29 @@ namespace Open.Collections.Numeric
 				}
 			}
 		}
+	}
 
-		protected override void OnDispose()
+	protected override void OnDispose()
+	{
+		foreach (var c in Cache.Values)
 		{
-			foreach (var c in Cache.Values)
+			foreach (var s in c.Values)
 			{
-				foreach (var s in c.Values)
-				{
-					if (s is IDisposable d) d.Dispose();
-				}
+				if (s is IDisposable d) d.Dispose();
 			}
-			Cache.Clear();
 		}
 
+		Cache.Clear();
+	}
 
-		public static IEnumerable<int[]> GetUniqueAddendsBuffered(int sum, int count)
+	public static IEnumerable<int[]> GetUniqueAddendsBuffered(int sum, int count)
+	{
+		return count > int.MaxValue ? throw new ArgumentOutOfRangeException(nameof(count), count, "Cannot be greater than signed 32 bit integer maximum.")
+			: count < 2 || sum < 3 ? Enumerable.Empty<int[]>()
+			: GetUniqueAddendsBufferedCore(sum, count);
+
+		static IEnumerable<int[]> GetUniqueAddendsBufferedCore(int sum, int count)
 		{
-			if (count > int.MaxValue)
-				throw new ArgumentOutOfRangeException(nameof(count), count, "Cannot be greater than signed 32 bit integer maximum.");
-			if (count < 2 || sum < 3)
-				yield break;
-
 			var pool = ArrayPool<int>.Shared;
 			var result = pool.Rent(count);
 
@@ -128,8 +126,8 @@ namespace Open.Collections.Numeric
 				pool.Return(result);
 			}
 		}
-
-		public static IEnumerable<IEnumerable<int>> GetUniqueAddendsEnumerable(int sum, int count)
-			=> GetUniqueAddendsBuffered(sum, count).Select(a => a.Take(count));
 	}
+
+	public static IEnumerable<IEnumerable<int>> GetUniqueAddendsEnumerable(int sum, int count)
+		=> GetUniqueAddendsBuffered(sum, count).Select(a => a.Take(count));
 }
