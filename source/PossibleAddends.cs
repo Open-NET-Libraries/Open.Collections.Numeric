@@ -84,8 +84,8 @@ public class PossibleAddends : DisposableBase
 
 		static IEnumerable<int[]> GetUniqueAddendsBufferedCore(int sum, int count)
 		{
-			var pool = ArrayPool<int>.Shared;
-			var result = pool.Rent(count);
+			var pool = count > 128 ? ArrayPool<int>.Shared : null;
+			var result = pool?.Rent(count) ?? new int[count];
 
 			try
 			{
@@ -123,7 +123,7 @@ public class PossibleAddends : DisposableBase
 			}
 			finally
 			{
-				pool.Return(result);
+				pool?.Return(result);
 			}
 		}
 	}
