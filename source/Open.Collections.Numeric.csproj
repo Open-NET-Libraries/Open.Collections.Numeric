@@ -17,7 +17,7 @@
 		<PackageProjectUrl>https://github.com/Open-NET-Libraries/Open.Collections.Numeric/</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/Open-NET-Libraries/Open.Collections.Numeric/</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<Version>1.6.0</Version>
+		<Version>1.7.0</Version>
 		<PackageReleaseNotes></PackageReleaseNotes>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -28,6 +28,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+		<PackageReference Include="Open.Collections" Version="3.1.*" />
+		<PackageReference Include="Open.Numeric" Version="2.3.*" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -44,11 +46,6 @@
     <None Remove=".gitignore" />
     <None Remove="LICENSE.md" />
     <None Remove="README.md" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Open.Collections" Version="3.0.0" />
-    <PackageReference Include="Open.Numeric" Version="2.3.1" />
   </ItemGroup>
 
 </Project>
