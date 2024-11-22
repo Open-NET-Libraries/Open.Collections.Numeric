@@ -42,15 +42,14 @@ public class PossibleAddends : DisposableBase
 
 			{
 				int i = 2;
-				var c1 = count - 1;
-				var c2 = c1 - 1;
-				var builder = ImmutableArray.CreateBuilder<int>();
+				int c1 = count - 1;
+				int c2 = c1 - 1;
+				ImmutableArray<int>.Builder builder = ImmutableArray.CreateBuilder<int>();
 
 				while (++i < sum)
 				{
-					var next = sum - i;
-					var addends = UniqueAddendsFor(i, c1);
-					foreach (var a in addends)
+					int next = sum - i;
+					foreach (IReadOnlyList<int> a in UniqueAddendsFor(i, c1))
 					{
 						builder.Capacity = count;
 						if (a[c2] >= next) continue;
@@ -65,9 +64,9 @@ public class PossibleAddends : DisposableBase
 
 	protected override void OnDispose()
 	{
-		foreach (var c in Cache.Values)
+		foreach (ConcurrentDictionary<int, IReadOnlyList<IReadOnlyList<int>>> c in Cache.Values)
 		{
-			foreach (var s in c.Values)
+			foreach (IReadOnlyList<IReadOnlyList<int>> s in c.Values)
 			{
 				if (s is IDisposable d) d.Dispose();
 			}
@@ -84,8 +83,8 @@ public class PossibleAddends : DisposableBase
 
 		static IEnumerable<int[]> GetUniqueAddendsBufferedCore(int sum, int count)
 		{
-			var pool = count > 128 ? ArrayPool<int>.Shared : null;
-			var result = pool?.Rent(count) ?? new int[count];
+			ArrayPool<int>? pool = count > 128 ? ArrayPool<int>.Shared : null;
+			int[] result = pool?.Rent(count) ?? new int[count];
 
 			try
 			{
@@ -104,14 +103,13 @@ public class PossibleAddends : DisposableBase
 
 				{
 					int i = 2;
-					var c1 = count - 1;
-					var c2 = c1 - 1;
+					int c1 = count - 1;
+					int c2 = c1 - 1;
 
 					while (++i < sum)
 					{
-						var next = sum - i;
-						var addends = GetUniqueAddendsBuffered(i, c1);
-						foreach (var a in addends)
+						int next = sum - i;
+						foreach (int[] a in GetUniqueAddendsBuffered(i, c1))
 						{
 							if (a[c2] >= next) continue;
 							a.CopyTo(result, 0);

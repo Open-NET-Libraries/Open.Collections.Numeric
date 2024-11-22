@@ -1,4 +1,4 @@
-﻿using Open.Numeric.Precision;
+﻿using Open.Numeric;
 using Open.Threading;
 using System;
 using System.Collections.Concurrent;
@@ -50,21 +50,18 @@ public static class Extensions
 
 		foreach (var key in target.Keys)
 		{
-			if (!copy.ContainsKey(key))
-			{
-				Debugger.Break();
-				Debug.Fail("Key missing from copy.");
-				return;
-			}
-			else
+			if (copy.TryGetValue(key, out TValue? b))
 			{
 				var a = target[key];
-				var b = copy[key];
 				if (a.IsNearEqual(b, 0.001)) continue;
 				Debugger.Break();
 				Debug.Fail("Copied value is not equal!");
 				return;
 			}
+
+			Debugger.Break();
+			Debug.Fail("Key missing from copy.");
+			return;
 		}
 	}
 
@@ -74,9 +71,10 @@ public static class Extensions
 	/// <param name="values">The source enumerable.</param>
 	/// <param name="autoPrecision">True is more accurate but less performant.  False uses default double precision math.</param>
 	public static IDictionary<TKey, double> SumValues<TKey>(this IEnumerable<IDictionary<TKey, double>> values, bool autoPrecision = true)
-		where TKey : IComparable
+		where TKey : notnull, IComparable
 	{
-		if (values is null) throw new NullReferenceException();
+		if (values is null)
+			throw new ArgumentNullException(nameof(values));
 		Contract.EndContractBlock();
 
 		var result = new ConcurrentDictionary<TKey, double>();
@@ -92,9 +90,10 @@ public static class Extensions
 	/// <param name="autoPrecision">True is more accurate but less performant.  False uses default double precision math.</param>
 	/// <param name="allowParallel">Enables parallel processing of source enumerable.</param>
 	public static SortedDictionary<TKey, double> SumValuesOrdered<TKey>(this IEnumerable<IDictionary<TKey, double>> values, bool autoPrecision = true, bool allowParallel = false)
-		where TKey : IComparable
+		where TKey : notnull, IComparable
 	{
-		if (values is null) throw new NullReferenceException();
+		if (values is null)
+			throw new ArgumentNullException(nameof(values));
 		Contract.EndContractBlock();
 
 		var result = new ConcurrentDictionary<TKey, double>();
@@ -109,9 +108,10 @@ public static class Extensions
 	/// <param name="values">The source enumerable</param>
 	/// <param name="autoPrecision">True is more accurate but less performant.  False uses default double precision math.</param>
 	public static SortedDictionary<TKey, double> SumValuesOrdered<TKey>(this ParallelQuery<IDictionary<TKey, double>> values, bool autoPrecision = true)
-		where TKey : IComparable
+		where TKey : notnull, IComparable
 	{
-		if (values is null) throw new NullReferenceException();
+		if (values is null)
+			throw new ArgumentNullException(nameof(values));
 		Contract.EndContractBlock();
 
 		var result = new ConcurrentDictionary<TKey, double>();
@@ -125,8 +125,10 @@ public static class Extensions
 	/// </summary>
 	/// <param name="values">The source enumerable</param>
 	public static IDictionary<TKey, double> Deltas<TKey>(this IEnumerable<KeyValuePair<TKey, double>> values)
+		where TKey : notnull
 	{
-		if (values is null) throw new NullReferenceException();
+		if (values is null)
+			throw new ArgumentNullException(nameof(values));
 		Contract.EndContractBlock();
 
 		var result = new SortedDictionary<TKey, double>();
@@ -134,7 +136,7 @@ public static class Extensions
 		double current = 0;
 		foreach (var kvp in values.OrderBy(k => k.Key))
 		{
-			var delta = kvp.Value.SumAccurate(-current); // Must use accurate math otherwise tolerance can throw off entire set.
+			double delta = kvp.Value.SumAccurate(-current); // Must use accurate math otherwise tolerance can throw off entire set.
 			result[kvp.Key] = delta;
 			current = current.SumAccurate(delta);
 		}
@@ -147,9 +149,11 @@ public static class Extensions
 	/// </summary>
 	/// <param name="values">The source enumerable</param>
 	public static IEnumerable<KeyValuePair<TKey, double>> DeltaCurve<TKey>(this IEnumerable<KeyValuePair<TKey, double>> values)
+
+		where TKey : notnull
 	{
 		return values is null
-			? throw new NullReferenceException()
+			? throw new ArgumentNullException(nameof(values))
 			: DeltaCurveCore(values);
 
 		static IEnumerable<KeyValuePair<TKey, double>> DeltaCurveCore(IEnumerable<KeyValuePair<TKey, double>> values)
@@ -170,33 +174,27 @@ public static class Extensions
 	/// </summary>
 	/// <param name="values">The source enumerable</param>
 	public static IEnumerable<IDictionary<TKey, double>> Deltas<TKey>(this IEnumerable<IEnumerable<KeyValuePair<TKey, double>>> values)
-	{
-		if (values is null) throw new NullReferenceException();
-		Contract.EndContractBlock();
 
-		return values.Select(v => v.Deltas());
-	}
+		where TKey : notnull
+		=> values.Select(v => v.Deltas());
 
 	/// <summary>
 	/// Returns how the set of values has changed.
 	/// </summary>
 	/// <param name="values">The source enumerable</param>
 	public static ParallelQuery<IDictionary<TKey, double>> Deltas<TKey>(this ParallelQuery<IDictionary<TKey, double>> values)
-	{
-		if (values is null) throw new NullReferenceException();
-		Contract.EndContractBlock();
-
-		return values.Select(v => v.Deltas());
-	}
+		where TKey : notnull
+		=> values.Select(v => v.Deltas());
 
 	/// <summary>
 	/// Accurately adds the values from a set of curves and returns one curve.
 	/// </summary>
 	/// <param name="values">The source enumerable</param>
 	public static IEnumerable<KeyValuePair<TKey, double>> SumCurves<TKey>(this IEnumerable<IDictionary<TKey, double>> values)
-		where TKey : IComparable
+		where TKey : notnull, IComparable
 	{
-		if (values is null) throw new NullReferenceException();
+		if (values is null)
+			throw new ArgumentNullException(nameof(values));
 		Contract.EndContractBlock();
 
 		// Optimize to avoiding unnecessary processing...
@@ -207,7 +205,7 @@ public static class Extensions
 		{
 			case 0:
 				v.Dispose();
-				return new SortedDictionary<TKey, double>();
+				return Enumerable.Empty<KeyValuePair<TKey, double>>();
 			case 1:
 				v.Dispose();
 				return new SortedDictionary<TKey, double>(one.Single());
@@ -224,56 +222,43 @@ public static class Extensions
 	/// </summary>
 	// ReSharper disable once UnusedParameter.Global
 	public static IEnumerable<KeyValuePair<TKey, double>> SumCurves<TKey>(this ParallelQuery<IDictionary<TKey, double>> values)
-		where TKey : IComparable
-	{
-		if (values is null) throw new NullReferenceException();
-		Contract.EndContractBlock();
-
-		return values
+		where TKey : notnull, IComparable
+		=> values
 			.Deltas()
 			.SumValuesOrdered()
 			.DeltaCurve();
-	}
 
 	/// <summary>
-	/// Accurately adds the values from a set of curves and returns one curve.
+	/// Resets the values to zero if not within the tolerance of zero.
 	/// </summary>
-	public static IEnumerable<KeyValuePair<TKey, double>> ResetZeros<TKey>(this IEnumerable<KeyValuePair<TKey, double>> values, double tolerance = double.Epsilon)
-		where TKey : IComparable
+	public static IEnumerable<KeyValuePair<TKey, double>> ResetZeros<TKey>(
+		this IEnumerable<KeyValuePair<TKey, double>> values, double tolerance = double.Epsilon)
+		where TKey : notnull, IComparable
+		=> values.Select(v =>
 	{
-		if (values is null) throw new NullReferenceException();
-		Contract.EndContractBlock();
+		double value = v.Value;
+		return KeyValuePair.Create(v.Key, value.IsNearZero(tolerance) ? 0d : value);
+	});
 
-		return values.Select(v =>
-		{
-			var value = v.Value;
-			return KeyValuePair.Create(v.Key, value.IsNearZero(tolerance) ? 0d : value);
-		});
-	}
+	/// <inheritdoc cref="ResetZeros{TKey}(IEnumerable{KeyValuePair{TKey, double}}, double)"/>/>
+	public static ParallelQuery<KeyValuePair<TKey, double>> ResetZeros<TKey>(
+		this ParallelQuery<KeyValuePair<TKey, double>> values, double tolerance = double.Epsilon)
+		where TKey : notnull, IComparable
+		=> values.Select(v =>
+	{
+		double value = v.Value;
+		return KeyValuePair.Create(v.Key, value.IsNearZero(tolerance) ? 0d : value);
+	});
 
 	/// <summary>
-	/// Accurately adds the values from a set of curves and returns one curve.
-	/// </summary>
-	public static ParallelQuery<KeyValuePair<TKey, double>> ResetZeros<TKey>(this ParallelQuery<KeyValuePair<TKey, double>> values, double tolerance = double.Epsilon)
-		where TKey : IComparable
-	{
-		if (values is null) throw new NullReferenceException();
-		Contract.EndContractBlock();
-
-		return values.Select(v =>
-		{
-			var value = v.Value;
-			return KeyValuePair.Create(v.Key, value.IsNearZero(tolerance) ? 0d : value);
-		});
-	}
-
-	/// <summary>
-	/// Thread safe method which divides an existing cacheKey value by the given denominator.
+	/// Divides an existing <typeparamref name="TKey"/> value by the given <paramref name="denominator"/>.
 	/// Ignores missing keys.
 	/// </summary>
 	public static void Divide<TKey>(this IDictionary<TKey, double> target, TKey key, double denominator)
+		where TKey : notnull
 	{
-		if (target is null) throw new NullReferenceException();
+		if (target is null)
+			throw new ArgumentNullException(nameof(target));
 		if (key is null) throw new ArgumentNullException(nameof(key));
 		Contract.EndContractBlock();
 
@@ -281,8 +266,8 @@ public static class Extensions
 		//if(c!=null)
 		//{
 			// No need for locking... (optimistic)*/
-		if (target.ContainsKey(key))
-			target[key] /= denominator;
+		if (target.TryGetValue(key, out double value))
+			target[key] = value / denominator;
 		/*}
 		else
 		{
@@ -293,9 +278,12 @@ public static class Extensions
 		}*/
 	}
 
+	/// <inheritdoc cref="DivideAll{TKey}(IDictionary{TKey, double}, double)"/>
 	public static void DivideAll<TKey>(this IDictionary<TKey, double> target, double denominator)
+		where TKey : notnull
 	{
-		if (target is null) throw new NullReferenceException();
+		if (target is null)
+			throw new ArgumentNullException(nameof(target));
 		Contract.EndContractBlock();
 
 		target.Keys.ToArray().ForEach(
@@ -304,21 +292,13 @@ public static class Extensions
 			);
 	}
 
+	/// <inheritdoc cref="DivideAll{TKey}(IDictionary{TKey, double}, double)"/>
 	public static void DivideAll(this IDictionary<TimeSpan, double> target, double denominator)
-	{
-		if (target is null) throw new NullReferenceException();
-		Contract.EndContractBlock();
+		=> DivideAll<TimeSpan>(target, denominator);
 
-		DivideAll<TimeSpan>(target, denominator);
-	}
-
+	/// <inheritdoc cref="DivideAll{TKey}(IDictionary{TKey, double}, double)"/>
 	public static void DivideAll(this IDictionary<DateTime, double> target, double denominator)
-	{
-		if (target is null) throw new NullReferenceException();
-		Contract.EndContractBlock();
-
-		DivideAll<DateTime>(target, denominator);
-	}
+		=> DivideAll<DateTime>(target, denominator);
 
 	#region AddValue
 	#region ConcurrentDictionary versions
@@ -327,9 +307,10 @@ public static class Extensions
 	/// Adds a value to the colleciton or replaces the existing value with the sum of the two.
 	/// </summary>
 	public static void AddValue<TKey>(this ConcurrentDictionary<TKey, double> target, TKey key, double value)
+		where TKey : notnull
 	{
 		if (target is null)
-			throw new NullReferenceException();
+			throw new ArgumentNullException(nameof(target));
 		Contract.EndContractBlock();
 
 		_ = target.AddOrUpdate(key, value, (_, old) => old + value);
@@ -340,9 +321,10 @@ public static class Extensions
 	/// Uses a more accurate and less performant method instead of double precision math.
 	/// </summary>
 	public static void AddValueAccurate<TKey>(this ConcurrentDictionary<TKey, double> target, TKey key, double value)
+		where TKey : notnull
 	{
 		if (target is null)
-			throw new NullReferenceException();
+			throw new ArgumentNullException(nameof(target));
 		Contract.EndContractBlock();
 
 		_ = target.AddOrUpdate(key, value, (_, old) => old.SumAccurate(value));
@@ -352,9 +334,10 @@ public static class Extensions
 	/// Adds a value to the colleciton or replaces the existing value with the sum of the two.
 	/// </summary>
 	public static void AddValue<TKey>(this ConcurrentDictionary<TKey, int> target, TKey key, int value)
+		where TKey : notnull
 	{
 		if (target is null)
-			throw new NullReferenceException();
+			throw new ArgumentNullException(nameof(target));
 		Contract.EndContractBlock();
 
 		_ = target.AddOrUpdate(key, value, (_, old) => old + value);
@@ -364,9 +347,10 @@ public static class Extensions
 	/// Adds a value to the colleciton or replaces the existing value with the sum of the two.
 	/// </summary>
 	public static void AddValue<TKey>(this ConcurrentDictionary<TKey, uint> target, TKey key, uint value)
+		where TKey : notnull
 	{
 		if (target is null)
-			throw new NullReferenceException();
+			throw new ArgumentNullException(nameof(target));
 		Contract.EndContractBlock();
 
 		_ = target.AddOrUpdate(key, value, (_, old) => old + value);
@@ -376,9 +360,10 @@ public static class Extensions
 	/// Adds a value to the colleciton or replaces the existing value with the sum of the two.
 	/// </summary>
 	public static void IncrementValue<TKey>(this ConcurrentDictionary<TKey, uint> target, TKey key)
+		where TKey : notnull
 	{
 		if (target is null)
-			throw new NullReferenceException();
+			throw new ArgumentNullException(nameof(target));
 		Contract.EndContractBlock();
 
 		_ = target.AddOrUpdate(key, 1, (_, old) => old + 1);
@@ -388,44 +373,28 @@ public static class Extensions
 	/// Adds a value to the colleciton or replaces the existing value with the sum of the two.
 	/// </summary>
 	public static void AddValue(this ConcurrentDictionary<TimeSpan, double> target, TimeSpan time, double value)
-	{
-		if (target is null)
-			throw new NullReferenceException();
-		Contract.EndContractBlock();
-
-		AddValue<TimeSpan>(target, time, value);
-	}
+		=> AddValue<TimeSpan>(target, time, value);
 
 	/// <summary>
 	/// Adds a value to the colleciton or replaces the existing value with the sum of the two.
 	/// </summary>
 	public static void AddValue(this ConcurrentDictionary<TimeSpan, double> target, DateTime datetime, double value)
-	{
-		if (target is null)
-			throw new NullReferenceException();
-		Contract.EndContractBlock();
-
-		AddValue(target, datetime.TimeOfDay, value);
-	}
+		=> AddValue(target, datetime.TimeOfDay, value);
 
 	/// <summary>
 	/// Adds a value to the colleciton or replaces the existing value with the sum of the two.
 	/// </summary>
 	public static void AddValue(this ConcurrentDictionary<DateTime, double> target, TimeSpan time, double v)
-	{
-		if (target is null)
-			throw new NullReferenceException();
-
-		AddValue(target, DateTime.MinValue.Add(time), v);
-	}
+		=> AddValue(target, DateTime.MinValue.Add(time), v);
 
 	/// <summary>
 	/// Adds values to the colleciton or replaces the existing values with the sum of the two.
 	/// </summary>
 	public static void AddValues<TKey>(this ConcurrentDictionary<TKey, double> target, IDictionary<TKey, double> add, bool allowParallel = false)
+		where TKey : notnull
 	{
 		if (target is null)
-			throw new NullReferenceException();
+			throw new ArgumentNullException(nameof(target));
 		if (add is null)
 			throw new ArgumentNullException(nameof(add));
 		Contract.EndContractBlock();
@@ -437,9 +406,10 @@ public static class Extensions
 	/// Adds values to the colleciton or replaces the existing values with the sum of the two.
 	/// </summary>
 	public static void AddValues<TKey>(this IDictionary<TKey, double> target, IDictionary<TKey, double> add)
+		where TKey : notnull
 	{
 		if (target is null)
-			throw new NullReferenceException();
+			throw new ArgumentNullException(nameof(target));
 		if (add is null)
 			throw new ArgumentNullException(nameof(add));
 		Contract.EndContractBlock();
@@ -455,10 +425,12 @@ public static class Extensions
 	/// Adds values to the colleciton or replaces the existing values with the sum of the two.
 	/// Uses a more accurate and less performant method instead of double precision math.
 	/// </summary>
-	public static void AddValuesAccurateSelective<TKey>(this ConcurrentDictionary<TKey, double> target, IDictionary<TKey, double> add, bool allowParallel = false)
+	public static void AddValuesAccurateSelective<TKey>(
+		this ConcurrentDictionary<TKey, double> target, IDictionary<TKey, double> add, bool allowParallel = false)
+		where TKey : notnull
 	{
 		if (target is null)
-			throw new NullReferenceException();
+			throw new ArgumentNullException(nameof(target));
 		if (add is null)
 			throw new ArgumentNullException(nameof(add));
 		Contract.EndContractBlock();
@@ -471,9 +443,10 @@ public static class Extensions
 	/// Uses a more accurate and less performant method instead of double precision math.
 	/// </summary>
 	public static void AddValuesAccurate<TKey>(this ConcurrentDictionary<TKey, double> target, IDictionary<TKey, double> add)
+		where TKey : notnull
 	{
 		if (target is null)
-			throw new NullReferenceException();
+			throw new ArgumentNullException(nameof(target));
 		if (add is null)
 			throw new ArgumentNullException(nameof(add));
 		Contract.EndContractBlock();
@@ -490,8 +463,10 @@ public static class Extensions
 	/// </summary>
 	public static void AddValueAccurate<TKey>(this IDictionary<TKey, double> target, TKey key, double value)
 	{
-		if (target is null) throw new NullReferenceException();
-		if (key is null) throw new ArgumentNullException(nameof(key));
+		if (target is null)
+			throw new ArgumentNullException(nameof(target));
+		if (key is null)
+			throw new ArgumentNullException(nameof(key));
 		Contract.EndContractBlock();
 
 		_ = target.AddOrUpdate(key, value, (_, old) => old.SumAccurate(value));
@@ -503,8 +478,10 @@ public static class Extensions
 	/// </summary>
 	public static void AddValue<TKey>(this IDictionary<TKey, double> target, TKey key, double value)
 	{
-		if (target is null) throw new NullReferenceException();
-		if (key is null) throw new ArgumentNullException(nameof(key));
+		if (target is null)
+			throw new ArgumentNullException(nameof(target));
+		if (key is null)
+			throw new ArgumentNullException(nameof(key));
 		Contract.EndContractBlock();
 
 		_ = target.AddOrUpdate(key, value, (_, old) => old + value);
@@ -516,8 +493,10 @@ public static class Extensions
 	/// </summary>
 	public static void AddValue<TKey>(this IDictionary<TKey, int> target, TKey key, int value)
 	{
-		if (target is null) throw new NullReferenceException();
-		if (key is null) throw new ArgumentNullException(nameof(key));
+		if (target is null)
+			throw new ArgumentNullException(nameof(target));
+		if (key is null)
+			throw new ArgumentNullException(nameof(key));
 		Contract.EndContractBlock();
 
 		_ = target.AddOrUpdate(key, value, (_, old) => old + value);
@@ -529,8 +508,10 @@ public static class Extensions
 	/// </summary>
 	public static void AddValue<TKey>(this IDictionary<TKey, uint> target, TKey key, uint value)
 	{
-		if (target is null) throw new NullReferenceException();
-		if (key is null) throw new ArgumentNullException(nameof(key));
+		if (target is null)
+			throw new ArgumentNullException(nameof(target));
+		if (key is null)
+			throw new ArgumentNullException(nameof(key));
 		Contract.EndContractBlock();
 
 		_ = target.AddOrUpdate(key, value, (_, old) => old + value);
@@ -542,8 +523,10 @@ public static class Extensions
 	/// </summary>
 	public static void AddValueAccurateSynchronized<TKey>(this IDictionary<TKey, double> target, TKey key, double value)
 	{
-		if (target is null) throw new NullReferenceException();
-		if (key is null) throw new ArgumentNullException(nameof(key));
+		if (target is null)
+			throw new ArgumentNullException(nameof(target));
+		if (key is null)
+			throw new ArgumentNullException(nameof(key));
 		Contract.EndContractBlock();
 
 		_ = ThreadSafety.SynchronizeWrite(target, () => target.AddValueAccurate(key, value));
@@ -554,8 +537,10 @@ public static class Extensions
 	/// </summary>
 	public static void AddValueSynchronized<TKey>(this IDictionary<TKey, double> target, TKey key, double value)
 	{
-		if (target is null) throw new NullReferenceException();
-		if (key is null) throw new ArgumentNullException(nameof(key));
+		if (target is null)
+			throw new ArgumentNullException(nameof(target));
+		if (key is null)
+			throw new ArgumentNullException(nameof(key));
 		Contract.EndContractBlock();
 
 		_ = ThreadSafety.SynchronizeWrite(target, () => target.AddValue(key, value));
@@ -566,8 +551,10 @@ public static class Extensions
 	/// </summary>
 	public static void AddValueSynchronized<TKey>(this IDictionary<TKey, int> target, TKey key, int value)
 	{
-		if (target is null) throw new NullReferenceException();
-		if (key is null) throw new ArgumentNullException(nameof(key));
+		if (target is null)
+			throw new ArgumentNullException(nameof(target));
+		if (key is null)
+			throw new ArgumentNullException(nameof(key));
 		Contract.EndContractBlock();
 
 		_ = ThreadSafety.SynchronizeWrite(target, () => target.AddValue(key, value));
@@ -578,8 +565,10 @@ public static class Extensions
 	/// </summary>
 	public static void AddValueSynchronized<TKey>(this IDictionary<TKey, uint> target, TKey key, uint value)
 	{
-		if (target is null) throw new NullReferenceException();
-		if (key is null) throw new ArgumentNullException(nameof(key));
+		if (target is null)
+			throw new ArgumentNullException(nameof(target));
+		if (key is null)
+			throw new ArgumentNullException(nameof(key));
 		Contract.EndContractBlock();
 
 		_ = ThreadSafety.SynchronizeWrite(target, () => target.AddValue(key, value));
@@ -589,46 +578,31 @@ public static class Extensions
 	/// Adds a value to the colleciton or replaces the existing value with the sum of the two.
 	/// </summary>
 	public static void IncrementValueSynchronized<TKey>(this IDictionary<TKey, uint> target, TKey key)
-	{
-		if (target is null) throw new NullReferenceException();
-		if (key is null) throw new ArgumentNullException(nameof(key));
-		Contract.EndContractBlock();
-
-		target.AddValueSynchronized(key, 1);
-	}
+		=> target.AddValueSynchronized(key, 1);
 
 	/// <summary>
 	/// Adds a value to the colleciton or replaces the existing value with the sum of the two.
 	/// </summary>
 	public static void AddValueSynchronized(this IDictionary<TimeSpan, double> target, DateTime datetime, double value)
-	{
-		if (target is null) throw new NullReferenceException();
-		Contract.EndContractBlock();
-
-		target.AddValueSynchronized(datetime.TimeOfDay, value);
-	}
+		=> target.AddValueSynchronized(datetime.TimeOfDay, value);
 
 	/// <summary>
 	/// Adds a value to the colleciton or replaces the existing value with the sum of the two.
 	/// </summary>
 	public static void AddValueSynchronized(this IDictionary<DateTime, double> target, TimeSpan time, double value)
-	{
-		if (target is null) throw new NullReferenceException();
-		Contract.EndContractBlock();
-
-		target.AddValueSynchronized(DateTime.MinValue.Add(time), value);
-	}
+		=> target.AddValueSynchronized(DateTime.MinValue.Add(time), value);
 
 	/// <summary>
 	/// Adds values to the colleciton or replaces the existing values with the sum of the two.
 	/// </summary>
 	public static void AddValueSynchronized<TKey>(this IDictionary<TKey, double> target, IDictionary<TKey, double> add)
 	{
-		if (target is null) throw new NullReferenceException();
+		if (target is null)
+			throw new ArgumentNullException(nameof(target));
 		Contract.EndContractBlock();
 
 		// For abs peak performance only create locking for individual entries...
-		_ = Parallel.ForEach(add, kv => target.AddValueSynchronized<TKey>(kv.Key, kv.Value));
+		_ = Parallel.ForEach(add, kv => target.AddValueSynchronized(kv.Key, kv.Value));
 	}
 
 	/// <summary>
@@ -637,7 +611,8 @@ public static class Extensions
 	/// </summary>
 	public static void AddValueAccurateSynchronized<TKey>(this IDictionary<TKey, double> target, IDictionary<TKey, double> add)
 	{
-		if (target is null) throw new NullReferenceException();
+		if (target is null)
+			throw new ArgumentNullException(nameof(target));
 		Contract.EndContractBlock();
 
 		// For abs peak performance only create locking for individual entries...
