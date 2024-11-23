@@ -1,4 +1,4 @@
-﻿using Open.Numeric;
+﻿using Open.Numeric.Precision;
 using Open.Threading;
 using System;
 using System.Collections.Concurrent;
